@@ -14,7 +14,8 @@ def matrix_extractor(arquivo_excel):
     df_recortado = df.iloc[linha_inicio:, coluna_inicio:]
 
     # Converter para NumPy array
-    matriz_numpy = df_recortado.to_numpy()
+    
+    matriz_numpy = df_recortado.to_numpy(dtype=float) 
 
     # Exibir a matriz
     return matriz_numpy
@@ -22,6 +23,8 @@ def matrix_extractor(arquivo_excel):
 import numpy as np
 
 def topsis(matriz, pesos, tipos_criterios):
+    pesos = np.array(pesos)
+
     # normaliza a matriz
     matriz_norm = matriz / np.sqrt((matriz ** 2).sum(axis=0))
     
@@ -37,6 +40,7 @@ def topsis(matriz, pesos, tipos_criterios):
             ideal_positivo[i] = matriz_pesada[:, i].max()
             ideal_negativo[i] = matriz_pesada[:, i].min()
         else:  # Critério de custo
+            
             ideal_positivo[i] = matriz_pesada[:, i].min()
             ideal_negativo[i] = matriz_pesada[:, i].max()
     
@@ -46,9 +50,22 @@ def topsis(matriz, pesos, tipos_criterios):
     
     # calcula o escore TOPSIS
     escore_topsis = distancia_negativo / (distancia_positivo + distancia_negativo)
-    
+    print(escore_topsis)
+    escore_topsis= escore_topsis.reshape(-1, 1)
+    print(escore_topsis)
     # ordena as alternativas pelo escore
-    ranking = np.argsort(escore_topsis)[::-1]  # Ordena do maior para o menor
+    indices = np.arange(escore_topsis.shape[0]).reshape(-1, 1)
+    matriz_nova = np.hstack((indices, escore_topsis))
+
+    print(matriz_nova)
+   # Ordenar a matriz pela coluna 0 (índices)
+    matriz_ordenada = matriz_nova[np.argsort(matriz_nova[:, 1])]
+
+    print("Matriz ordenada")
+    print(matriz_ordenada)  
+    ranking = np.delete(matriz_ordenada, 1, axis=1)
+    
+    
     
     return ranking, escore_topsis
 
@@ -57,8 +74,9 @@ def critic(X):
     
     print(X)
     #define quais os critérios de benefício e custo
-    benefit_criteria = [0, 2, 3, 4, 5, 7, 8, 9, 10, 11]  # 
-    cost_criteria = [1, 6]  
+    benefit_criteria = [0, 2, 3, 4, 6, 7, 8, 9,10]  
+    cost_criteria = [1, 5]  
+    #benefit_criteria = [0,1,2,3,4,5,6,7]
 
     #normaliza matriz
     X_norm = np.zeros_like(X, dtype=float)
@@ -70,17 +88,17 @@ def critic(X):
         if j in benefit_criteria:
             X_norm[:, j] = (X[:, j] - X_min) / (X_max - X_min)
         elif j in cost_criteria:
-            X_norm[:, j] = (X_max - X[:, j]) / (X_max - X_min)
+            X_norm[:, j] = (X[:, j]) - X_max / (X_min - X_max)
 
     # Calcula do desvio padrão dos critérios
     sigma = np.std(X_norm, axis=0, ddof=0)
 
     # Matriz de correlação
     R = np.corrcoef(X_norm, rowvar=False)
-
+   
     # Medida de informação Cj
     C = sigma * np.sum(1 - R, axis=1)
-
+   
     # Pesos normalizados
     w = C / np.sum(C)
 
