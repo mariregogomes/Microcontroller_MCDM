@@ -20,7 +20,6 @@ def matrix_extractor(arquivo_excel):
     # Exibir a matriz
     return matriz_numpy
 
-import numpy as np
 
 def topsis(matriz, pesos, tipos_criterios):
     pesos = np.array(pesos)
