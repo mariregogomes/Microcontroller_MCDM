@@ -59,25 +59,20 @@ def topsis(matriz, pesos, tipos_criterios):
 
     print(matriz_nova)
    # Ordenar a matriz pela coluna 0 (índices)
-    matriz_ordenada = matriz_nova[np.argsort(matriz_nova[:, 1])]
+    matriz_ordenada = matriz_nova[np.argsort(matriz_nova[:, 1])[::-1]] #ordem decrescente
 
     print("Matriz ordenada")
     print(matriz_ordenada)  
     ranking = np.delete(matriz_ordenada, 1, axis=1)
     
-    
-    
     return ranking, escore_topsis
 
 # Matriz de decisão (linhas = alternativas, colunas = critérios)
 def critic(X):
-    
     print(X)
     #define quais os critérios de benefício e custo
     benefit_criteria = [0, 2, 3, 4, 6, 7, 8, 9,10]  
     cost_criteria = [1, 5]  
-    #benefit_criteria = [0,1,2,3,4,5,6,7]
-
     #normaliza matriz
     X_norm = np.zeros_like(X, dtype=float)
 
@@ -97,7 +92,7 @@ def critic(X):
     R = np.corrcoef(X_norm, rowvar=False)
    
     # Medida de informação Cj
-    C = sigma * np.sum(1 - R, axis=1)
+    C = sigma * np.sum(1 - R, axis=0)
    
     # Pesos normalizados
     w = C / np.sum(C)
